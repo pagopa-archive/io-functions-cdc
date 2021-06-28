@@ -25,7 +25,7 @@ export type HealthProblem<S extends ProblemSource> = string & { __source: S };
 export type HealthCheck<
   S extends ProblemSource = ProblemSource,
   T = true
-> = TaskEither<ReadonlyArray<HealthProblem<S>>, T>;
+  > = TaskEither<ReadonlyArray<HealthProblem<S>>, T>;
 
 // format and cast a problem message with its source
 const formatProblem = <S extends ProblemSource>(
@@ -37,8 +37,8 @@ const formatProblem = <S extends ProblemSource>(
 const toHealthProblems = <S extends ProblemSource>(source: S) => (
   e: unknown
 ): ReadonlyArray<HealthProblem<S>> => [
-  formatProblem(source, toError(e).message)
-];
+    formatProblem(source, toError(e).message)
+  ];
 
 /**
  * Check application's configuration is correct
@@ -141,7 +141,7 @@ export const checkApplicationHealth = (): HealthCheck<ProblemSource, true> =>
         Array<TaskEither<ReadonlyArray<HealthProblem<ProblemSource>>, true>>
       >(
         checkAzureCosmosDbHealth(config.COSMOSDB_URI, config.COSMOSDB_KEY),
-        checkAzureStorageHealth(config.QueueStorageConnection)
+        checkAzureStorageHealth(config.AzureWebJobsStorage)
       )
     )
     .map(_ => true);

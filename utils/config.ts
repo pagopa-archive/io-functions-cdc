@@ -17,10 +17,8 @@ export const IConfig = t.interface({
   AzureWebJobsStorage: NonEmptyString,
 
   COSMOSDB_KEY: NonEmptyString,
-  COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
-
-  QueueStorageConnection: NonEmptyString,
+  MESSAGES_EVENTHUB_CONNECTION_STRING: NonEmptyString,
 
   isProduction: t.boolean
 });

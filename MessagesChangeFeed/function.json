@@ -1,0 +1,14 @@
+{
+  "bindings": [{
+    "type": "cosmosDBTrigger",
+    "name": "documents",
+    "direction": "in",
+    "leaseCollectionName": "leases",
+    "connectionStringSetting": "COSMOSDB_CONNECTION_STRING",
+    "databaseName": "db",
+    "collectionName": "messages",
+    "createLeaseCollectionIfNotExists": true,
+    "leaseCollectionPrefix": "messages-"
+  }],
+  "scriptFile": "../dist/MessagesChangeFeed/index.js"
+}
