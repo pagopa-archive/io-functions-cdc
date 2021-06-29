@@ -7,8 +7,9 @@ const config = getConfigOrThrow();
 
 const cosmosDBTrigger: AzureFunction = async (
   context: Context,
-  documents: ReadonlyArray<any>
+  documents: ReadonlyArray<Record<string, unknown>>
 ): Promise<void> => {
+  context.log(typeof documents);
   const producer = new EventHubProducerClient(
     config.MESSAGES_EVENTHUB_CONNECTION_STRING,
     eventHubName
@@ -18,12 +19,14 @@ const cosmosDBTrigger: AzureFunction = async (
       partitionKey: "fiscalCode"
     };
 
+    /*  eslint-disable functional/no-let */
     let batch = await producer.createBatch(batchOptions);
 
     let numEventsSent = 0;
 
     // add events to our batch
     let i = 0;
+    /* eslint-enable functional/no-let */
 
     while (!!documents && i < documents.length) {
       // messages can fail to be added to the batch if they exceed the maximum size configured for
@@ -31,7 +34,7 @@ const cosmosDBTrigger: AzureFunction = async (
       const isAdded = batch.tryAdd({ body: documents[i] });
 
       if (isAdded) {
-        console.log(`Added documents[${i}] to the batch`);
+        context.log(`Added documents[${i}] to the batch`);
         ++i;
         continue;
       }
@@ -42,7 +45,7 @@ const cosmosDBTrigger: AzureFunction = async (
         //
         // At this point you'll need to decide if you're okay with skipping this message entirely
         // or find some way to shrink it.
-        console.log(
+        context.log(
           `Message was too large and can't be sent until it's made smaller. Skipping...`
         );
         ++i;
@@ -50,7 +53,7 @@ const cosmosDBTrigger: AzureFunction = async (
       }
 
       // otherwise this just signals a good spot to send our batch
-      console.log(
+      context.log(
         `Batch is full - sending ${batch.count} messages as a single batch.`
       );
       await producer.sendBatch(batch);
@@ -62,14 +65,14 @@ const cosmosDBTrigger: AzureFunction = async (
 
     // send any remaining messages, if any.
     if (batch.count > 0) {
-      console.log(
+      context.log(
         `Sending remaining ${batch.count} messages as a single batch.`
       );
       await producer.sendBatch(batch);
       numEventsSent += batch.count;
     }
 
-    console.log(`Sent ${numEventsSent} events`);
+    context.log(`Sent ${numEventsSent} events`);
 
     if (numEventsSent !== documents.length) {
       throw new Error(
@@ -77,11 +80,11 @@ const cosmosDBTrigger: AzureFunction = async (
       );
     }
   } catch (err) {
-    console.log("Error when creating & sending a batch of events: ", err);
+    context.log("Error when creating & sending a batch of events: ", err);
   }
 
   await producer.close();
-  console.log(`Exiting sendEvents`);
+  context.log(`Exiting sendEvents`);
 };
 
 export default cosmosDBTrigger;

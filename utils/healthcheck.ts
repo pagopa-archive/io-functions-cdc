@@ -25,7 +25,7 @@ export type HealthProblem<S extends ProblemSource> = string & { __source: S };
 export type HealthCheck<
   S extends ProblemSource = ProblemSource,
   T = true
-  > = TaskEither<ReadonlyArray<HealthProblem<S>>, T>;
+> = TaskEither<ReadonlyArray<HealthProblem<S>>, T>;
 
 // format and cast a problem message with its source
 const formatProblem = <S extends ProblemSource>(
@@ -37,8 +37,8 @@ const formatProblem = <S extends ProblemSource>(
 const toHealthProblems = <S extends ProblemSource>(source: S) => (
   e: unknown
 ): ReadonlyArray<HealthProblem<S>> => [
-    formatProblem(source, toError(e).message)
-  ];
+  formatProblem(source, toError(e).message)
+];
 
 /**
  * Check application's configuration is correct
@@ -62,14 +62,10 @@ export const checkConfigHealth = (): HealthCheck<"Config", IConfig> =>
  * @returns either true or an array of error messages
  */
 export const checkAzureCosmosDbHealth = (
-  dbUri: string,
-  dbKey?: string
+  connectionString: string
 ): HealthCheck<"AzureCosmosDB", true> =>
   tryCatch(() => {
-    const client = new CosmosClient({
-      endpoint: dbUri,
-      key: dbKey
-    });
+    const client = new CosmosClient(connectionString);
     return client.getDatabaseAccount();
   }, toHealthProblems("AzureCosmosDB")).map(_ => true);
 
@@ -140,7 +136,7 @@ export const checkApplicationHealth = (): HealthCheck<ProblemSource, true> =>
         /* eslint-disable functional/prefer-readonly-type */
         Array<TaskEither<ReadonlyArray<HealthProblem<ProblemSource>>, true>>
       >(
-        checkAzureCosmosDbHealth(config.COSMOSDB_URI, config.COSMOSDB_KEY),
+        checkAzureCosmosDbHealth(config.COSMOSDB_CONNECTION_STRING),
         checkAzureStorageHealth(config.AzureWebJobsStorage)
       )
     )
