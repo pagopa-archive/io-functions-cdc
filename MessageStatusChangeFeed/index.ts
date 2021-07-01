@@ -1,5 +1,5 @@
 import { AzureFunction, Context } from "@azure/functions";
-import { messagesProducer } from "../utils/eventhub";
+import { messageStatusProducer } from "../utils/eventhub";
 import { getConfigOrThrow } from "../utils/config";
 
 const config = getConfigOrThrow();
@@ -12,11 +12,13 @@ const cosmosDBTrigger: AzureFunction = async (
 
   try {
     const batchOptions = {
-      partitionKey: config.MESSAGES_EVENTHUB_PARTITION_KEY
+      partitionKey: config.MESSAGE_STATUS_EVENTHUB_PARTITION_KEY
     };
 
+
+
     /*  eslint-disable functional/no-let */
-    let batch = await messagesProducer.createBatch(batchOptions);
+    let batch = await messageStatusProducer.createBatch(batchOptions);
 
     let numEventsSent = 0;
 
@@ -52,11 +54,11 @@ const cosmosDBTrigger: AzureFunction = async (
       context.log(
         `Batch is full - sending ${batch.count} messages as a single batch.`
       );
-      await messagesProducer.sendBatch(batch);
+      await messageStatusProducer.sendBatch(batch);
       numEventsSent += batch.count;
 
       // and create a new one to house the next set of messages
-      batch = await messagesProducer.createBatch(batchOptions);
+      batch = await messageStatusProducer.createBatch(batchOptions);
     }
 
     // send any remaining messages, if any.
@@ -64,7 +66,7 @@ const cosmosDBTrigger: AzureFunction = async (
       context.log(
         `Sending remaining ${batch.count} messages as a single batch.`
       );
-      await messagesProducer.sendBatch(batch);
+      await messageStatusProducer.sendBatch(batch);
       numEventsSent += batch.count;
     }
 

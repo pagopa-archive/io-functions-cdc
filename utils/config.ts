@@ -18,6 +18,9 @@ export const IConfig = t.interface({
 
   COSMOSDB_CONNECTION_STRING: NonEmptyString,
   MESSAGES_EVENTHUB_CONNECTION_STRING: NonEmptyString,
+  MESSAGES_EVENTHUB_PARTITION_KEY: NonEmptyString,
+  MESSAGE_STATUS_EVENTHUB_CONNECTION_STRING: NonEmptyString,
+  MESSAGE_STATUS_EVENTHUB_PARTITION_KEY: NonEmptyString,
 
   isProduction: t.boolean
 });
