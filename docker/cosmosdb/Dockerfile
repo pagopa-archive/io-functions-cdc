@@ -1,7 +1,9 @@
-FROM node:10.14.2-alpine
+FROM node:12.18.0-alpine
 
 WORKDIR /opt/cosmosdb
 
-RUN npm install -g @zeit/cosmosdb-server ts-node
+RUN npm install @zeit/cosmosdb-server @azure/cosmos ts-node
 
-CMD ["sh", "-c", "cosmosdb-server -p 3000"]
+COPY docker/cosmosdb/server.js /opt/cosmosdb
+
+CMD ["node", "server.js"]

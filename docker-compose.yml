@@ -11,6 +11,8 @@ services:
       - .env
     environment:
       - languageWorkers__node__arguments=--inspect=0.0.0.0:5858
+      - COSMOSDB_HOST=cosmosdb
+      - COSMOSDB_PORT=3000
     working_dir: /usr/src/app
     ports:
       - "7071:7071"
@@ -19,6 +21,7 @@ services:
       - io-fn
     depends_on:
       - fnstorage
+      - cosmosdb
     volumes:
       - .:/usr/src/app
     labels:
@@ -38,26 +41,11 @@ services:
       - "traefik.http.routers.functions.middlewares=testHeader"
 
   fnstorage:
-    image: azurite
-    build:
-      context: ./
-      dockerfile: docker/azurite/Dockerfile
+    image: mcr.microsoft.com/azure-storage/azurite
     ports:
       - "10000:10000"
       - "10001:10001"
       - "10002:10002"
-    networks:
-      - io-fn
-
-  storage:
-    image: azurite
-    command: ["sh", "-c", "node bin/azurite -l /opt/azurite/folder --blobPort 10003 --queuePort 10004 --tablePort 10005"]
-    ports:
-      - "10003:10003"
-      - "10004:10004"
-      - "10005:10005"
-    depends_on:
-      - fnstorage
     networks:
       - io-fn
 

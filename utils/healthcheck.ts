@@ -62,14 +62,10 @@ export const checkConfigHealth = (): HealthCheck<"Config", IConfig> =>
  * @returns either true or an array of error messages
  */
 export const checkAzureCosmosDbHealth = (
-  dbUri: string,
-  dbKey?: string
+  connectionString: string
 ): HealthCheck<"AzureCosmosDB", true> =>
   tryCatch(() => {
-    const client = new CosmosClient({
-      endpoint: dbUri,
-      key: dbKey
-    });
+    const client = new CosmosClient(connectionString);
     return client.getDatabaseAccount();
   }, toHealthProblems("AzureCosmosDB")).map(_ => true);
 
@@ -140,8 +136,8 @@ export const checkApplicationHealth = (): HealthCheck<ProblemSource, true> =>
         /* eslint-disable functional/prefer-readonly-type */
         Array<TaskEither<ReadonlyArray<HealthProblem<ProblemSource>>, true>>
       >(
-        checkAzureCosmosDbHealth(config.COSMOSDB_URI, config.COSMOSDB_KEY),
-        checkAzureStorageHealth(config.QueueStorageConnection)
+        checkAzureCosmosDbHealth(config.COSMOSDB_CONNECTION_STRING),
+        checkAzureStorageHealth(config.AzureWebJobsStorage)
       )
     )
     .map(_ => true);
